@@ -1,6 +1,8 @@
 #ifndef TYPE_INTERFACE_DEF
 #define TYPE_INTERFACE_DEF
 
-void Test_API();
+typedef vector<double> GlyphPoly;
+
+vector<GlyphPoly*>* Test_API();
 
 #endif

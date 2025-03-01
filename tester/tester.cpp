@@ -7,6 +7,8 @@
 #define GLUT_MOUSE_WHEEL_DOWN 4
 #define WHEEL_ZOOM_DELTA 1.1f
 
+vector<GlyphPoly*>* glyph;
+
 using namespace std;
 
 struct OutlinePolyline
@@ -163,7 +165,7 @@ void DrawGrid()
 	float maxX = (float)(gridRect.GetX2());
 	float maxY = (float)(gridRect.GetY2());
 	
-	glBegin(GL_LINES);	
+	glBegin(GL_LINES);
 	for (float y = minY; y<=maxY; y+=gridSpacingY)
 	{
 		glVertex2f(minX, y);
@@ -185,6 +187,24 @@ void DrawGrid()
 	glEnd();
 }
 
+void DrawGlyph()
+{
+	printf("--------------\n");
+	glColor3ub( 200, 200, 0 );
+	for(auto *poly : *glyph)
+	{
+		printf("+++++++++++++++\n");
+		printf("--> %ld\n", poly->size());
+		const int vertCount = (int)(poly->size() / 2);
+		glBegin(GL_LINE_STRIP);
+		for(int i=0; i<vertCount; i++)
+		{
+			glVertex2f(poly->at(2*i), poly->at(2*i + 1));
+		}
+		glEnd();
+	}
+}
+
 void Draw()
 {
 	glClear( GL_COLOR_BUFFER_BIT );
@@ -200,6 +220,7 @@ void Draw()
 	glTranslatef(shiftX, shiftY, 0);
 	
 	DrawGrid();
+	DrawGlyph();
 	glutSwapBuffers();
 }
 
@@ -270,10 +291,10 @@ void InitGL(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	Test_API();
-	SetGrid(-10, 10, -10, 10, 1, 1);
+	glyph = Test_API();
+	//printf("\n\n--------%d\n", glyph->size());
+	SetGrid(-100, 1500, -100, 1500,50, 50);
 	
 	InitScales();
 	InitGL(argc, argv);
-	
 }
