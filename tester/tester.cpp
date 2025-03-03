@@ -189,18 +189,16 @@ void DrawGrid()
 
 void DrawGlyph()
 {
-	printf("--------------\n");
 	glColor3ub( 200, 200, 0 );
 	for(auto *poly : *glyph)
 	{
-		printf("+++++++++++++++\n");
-		printf("--> %ld\n", poly->size());
 		const int vertCount = (int)(poly->size() / 2);
 		glBegin(GL_LINE_STRIP);
 		for(int i=0; i<vertCount; i++)
 		{
 			glVertex2f(poly->at(2*i), poly->at(2*i + 1));
 		}
+		glVertex2f(poly->at(0), poly->at(1));	//closing segment
 		glEnd();
 	}
 }
@@ -234,7 +232,7 @@ void OnMouse(int button, int state, int x, int y)
 {
 	if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN)
 	{
-		printf("LEFT_DOWN: %d,%d\n", x, y);
+		;//printf("LEFT_DOWN: %d,%d\n", x, y);
 	}
 	else if(button==GLUT_LEFT_BUTTON && state==GLUT_UP)
 	{
@@ -292,6 +290,7 @@ void InitGL(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	glyph = Test_API();
+	//Test_Print();
 	//printf("\n\n--------%d\n", glyph->size());
 	SetGrid(-100, 1500, -100, 1500,50, 50);
 	

@@ -20,6 +20,7 @@ public:
 
     // Retrieve the next point (loops automatically)
     bool getNextPoint(FT_Vector& point, char& tag);
+    bool peekNextPoint(FT_Vector& point, char& tag);
 };
 
 #endif // OUTLINE_ITERATOR_H

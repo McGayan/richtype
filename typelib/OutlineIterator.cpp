@@ -19,13 +19,10 @@ void OutlineIterator::setContour(int index)
 
 bool OutlineIterator::getNextPoint(FT_Vector& point, char& tag)
 {
-	if (contourIndex < 0 || !outline) return false; // Invalid state
-
-	point = outline->points[currentIndex]; // Get the current point
-	tag = outline->tags[currentIndex];     // Get the tag value
-
-	currentIndex++; // Move to the next point
-
+	if(!peekNextPoint(point, tag))
+		return false;
+	
+	currentIndex++;
 	// If we reached past the last point, reset to start
 	if (currentIndex > endIndex)
 	{
@@ -34,4 +31,13 @@ bool OutlineIterator::getNextPoint(FT_Vector& point, char& tag)
 	}
 
 	return false; // Normal case
+}
+
+bool OutlineIterator::peekNextPoint(FT_Vector& point, char& tag)
+{
+	if (contourIndex < 0 || !outline) return false; // Invalid state
+
+	point = outline->points[currentIndex]; // Get the current point
+	tag = outline->tags[currentIndex];     // Get the tag value	
+	return true;
 }

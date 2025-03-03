@@ -13,4 +13,6 @@ void convertBezierToVertices(const FT_Vector& firstControlPoint,
 								const FT_Vector& lastControlPoint, 
 								double dt, 
 								vector<double>* pointList);
+								
+void midPoint(FT_Vector& p1, FT_Vector& p2, FT_Vector& pMid);
 #endif	//PATH_H

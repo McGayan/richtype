@@ -23,7 +23,7 @@ vector<GlyphPoly*>* Test_API()
 
 	FT_Set_Pixel_Sizes(face, 0, 48); // Set height to 48 pixels
 
-	FT_UInt glyph_index = FT_Get_Char_Index(face, 'o'); // Get glyph index for 'A'
+	FT_UInt glyph_index = FT_Get_Char_Index(face, 'B'); // Get glyph index for 'A'
 	if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) {
 		printf("Failed to load glyph\n");
 		return NULL;
@@ -33,14 +33,11 @@ vector<GlyphPoly*>* Test_API()
 		FT_Outline *outline = &face->glyph->outline;
 		printf("Number of contours: %d\n", outline->n_contours);
 		printf("Number of points: %d\n", outline->n_points);
-		int endIndex = 0;
+		//int endIndex = 0;
 		OutlineIterator* outlineIter = new OutlineIterator(outline);
 		glyph = new vector<GlyphPoly*>();
 		for(int i=0; i<outline->n_contours; i++)
 		{
-			//int startIndex = endIndex + 1;
-			//endIndex = outline->contours[i];
-			printf("C: %d----\n", i);
 			outlineIter->setContour(i);
 			FT_Vector point, nextPoint, nextNextPoint;
 			char tag, nextTag, nextNextTag;
@@ -48,56 +45,47 @@ vector<GlyphPoly*>* Test_API()
 			vector<double>* vertices = new vector<double>();
 			while(!loopBack)
 			{
-				printf("%ld, %ld	tags->%X\n", point.x, point.y, (uint8_t)tag);
-				if((tag | FT_CURVE_TAG_ON) == true)
+				//printf("%ld, %ld	tags->%X\n", point.x, point.y, (uint8_t)tag);
+				if((tag & 0x01) != 0)
 				{
 					loopBack |= outlineIter->getNextPoint(nextPoint, nextTag);
-					if((nextTag | FT_CURVE_TAG_ON) == true)
+					if((nextTag & 0x01) != 0)
 					{//add line segment from point->next point
 						vertices->push_back(point.x);
 						vertices->push_back(point.y);
 						vertices->push_back(nextPoint.x);
 						vertices->push_back(nextPoint.y);
-						
-					}
-					point = nextPoint;
-					tag = nextTag;
-				}
-				else
-				{
-					loopBack |= outlineIter->getNextPoint(nextPoint, nextTag);
-					if((nextTag | FT_CURVE_TAG_ON) == false)
-					{//control, control	-> add a on curve point at the center and place a bezier
-						convertBezierToVertices(point, nextPoint, dt, vertices);
 						point = nextPoint;
 						tag = nextTag;
 					}
 					else
-					{
-						loopBack |= outlineIter->getNextPoint(nextNextPoint, nextNextTag);
-						if((nextNextTag | FT_CURVE_TAG_ON) == false)
-						{//control, on, control	-> add bezier
+					{//on,off
+						outlineIter->peekNextPoint(nextNextPoint, nextNextTag);
+						if((nextNextTag & 0x01) != 0)
+						{//on, off, on
+							loopBack |= outlineIter->getNextPoint(nextNextPoint, nextNextTag);
 							convertBezierToVertices(point, nextPoint, nextNextPoint, dt, vertices);
+							point = nextNextPoint;
+							tag = nextNextTag;
 						}
 						else
-						{//control, on, on -> add polyline from next to nextnext
-							vertices->push_back(nextPoint.x);
-							vertices->push_back(nextPoint.y);
-							vertices->push_back(nextNextPoint.x);
-							vertices->push_back(nextNextPoint.y);
+						{//on, off, off
+							FT_Vector pMid;
+							midPoint(nextPoint, nextNextPoint, pMid);
+							convertBezierToVertices(point, nextPoint, pMid, dt, vertices);
+							point = pMid;
+							tag = 0x01;
 						}
-						point = nextNextPoint;
-						tag = nextNextTag;
 					}
+					
 				}
-				//loopBack |= outlineIter->getNextPoint(point, tag);
+				else
+				{
+					printf("\noff ???\n");
+				}
+
 			}
 			glyph->push_back(vertices);
-			/*for(int j=startIndex; j<=endIndex; j++)
-			{
-				FT_Vector& point = outline->points[j];
-				printf("(%d)	%ld, %ld	tags->%X\n", j, point.x, point.y, (uint8_t)(outline->tags[j]));
-			}*/
 		}
 		delete outlineIter;
 	}

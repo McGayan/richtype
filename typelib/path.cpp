@@ -14,8 +14,6 @@ void convertBezierToVertices(const FT_Vector& firstControlPoint,
 								vector<double>* pointList)
 {
 	if (dt <= 0.0 || dt > 1.0) dt = 0.1; // Ensure dt is within a reasonable range
-	
-	printf("\n------------------dfgdsfgdf---------------dt: %f\n", dt);
 
 	std::vector<double> vertices;
 	for (double t = 0.0; t <= 1.0; t += dt)
@@ -33,9 +31,14 @@ void convertBezierToVertices(const FT_Vector& firstControlPoint,
 								double dt, 
 								vector<double>* pointList)
 {
-	printf("HELOO WORLD+++++++++++++++++++++++++++\n");
 	FT_Vector onCurvePoint;
 	onCurvePoint.x = (firstControlPoint.x + lastControlPoint.x) / 2.0 ;
 	onCurvePoint.y = (firstControlPoint.y + lastControlPoint.y) / 2.0 ;
 	convertBezierToVertices(firstControlPoint, onCurvePoint, lastControlPoint, dt, pointList);
+}
+
+void midPoint(FT_Vector& p1, FT_Vector& p2, FT_Vector& pMid)
+{
+	pMid.x = (int)((double)(p1.x + p2.x) / 2.0 + 0.5);
+	pMid.y = (int)((double)(p1.y + p2.y) / 2.0 + 0.5);
 }
