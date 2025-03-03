@@ -8,8 +8,9 @@ void convertBezierToVertices(const FT_Vector& firstControlPoint,
 								const FT_Vector& lastControlPoint, 
 								double dt, 
 								vector<double>* pointList);
-								
-void convertBezierToVertices(const FT_Vector& firstControlPoint, 
+
+void convertBezierToVerticesAdaptive(const FT_Vector& firstControlPoint, 
+								const FT_Vector& onCurvePoint, 
 								const FT_Vector& lastControlPoint, 
 								double dt, 
 								vector<double>* pointList);

@@ -6,7 +6,7 @@
 
 vector<GlyphPoly*>* Test_API()
 {
-	const double dt = 0.01;
+	const double dt = 0.1;
 	//printf("Hello World API");
 	FT_Library library;
 	FT_Face face;
@@ -64,7 +64,7 @@ vector<GlyphPoly*>* Test_API()
 						if((nextNextTag & 0x01) != 0)
 						{//on, off, on
 							loopBack |= outlineIter->getNextPoint(nextNextPoint, nextNextTag);
-							convertBezierToVertices(point, nextPoint, nextNextPoint, dt, vertices);
+							convertBezierToVerticesAdaptive(point, nextPoint, nextNextPoint, dt, vertices);
 							point = nextNextPoint;
 							tag = nextNextTag;
 						}
@@ -72,7 +72,7 @@ vector<GlyphPoly*>* Test_API()
 						{//on, off, off
 							FT_Vector pMid;
 							midPoint(nextPoint, nextNextPoint, pMid);
-							convertBezierToVertices(point, nextPoint, pMid, dt, vertices);
+							convertBezierToVerticesAdaptive(point, nextPoint, pMid, dt, vertices);
 							point = pMid;
 							tag = 0x01;
 						}
