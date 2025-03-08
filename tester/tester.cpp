@@ -61,62 +61,63 @@ int cbnBufferLength = 0;
 float scale = 1;
 float shiftX = 0;
 float shiftY = 0;
-CRectangle bRect;
 CRectangle gridRect;
 //vector<OutlinePolyline*> grid;
 float gridSpacingX;
 float gridSpacingY;
+CRectangle bRect;
 
-void GetBoundingBoxOfSrc(CRectangle* bRect)
+void CalculateGlyphBoundary()
 {
-	if(srcPolyList.size() > 0)
+	if((glyph == NULL) || (glyph->size() == 0))
+		return;
+	auto *poly = glyph->at(0);
+	float x = poly->at(0);
+	float y = poly->at(1);
+	float llcX = x;
+	float llcY = y;
+	float urcX = x;
+	float urcY = y;
+	for(auto *poly : *glyph)
 	{
-		OutlinePolyline* firstPoly = srcPolyList.at(0);
-		float x = firstPoly->Vertices[0];
-		float y = firstPoly->Vertices[1];
-
-		float llcX = x;
-		float llcY = y;
-		float urcX = x;
-		float urcY = y;
-		for(int polyIndex=0; polyIndex<srcPolyList.size(); polyIndex++)
+		const int vertCount = (int)(poly->size() / 2);
+		for(int i=0; i<vertCount; i++)
 		{
-			OutlinePolyline* poly = srcPolyList.at(polyIndex);
-			
-			if(poly->VertCount >1)
-			{
-
-				
-				for(int i=1; i<poly->VertCount; i++)
-				{
-					x = poly->Vertices[3*i];
-					y = poly->Vertices[3*i + 1];
-					if(x < llcX)
-						llcX = x;
-					else if(x > urcX)
-						urcX = x;
-
-					if(y < llcY)
-						llcY = y;
-					else if(y > urcY)
-						urcY = y;
-				}
-
-			}
+			x = poly->at(2*i);
+			y = poly->at(2*i + 1);
+			if(x < llcX)
+				llcX = x;
+			else if(x > urcX)
+				urcX = x;
+			if(y < llcY)
+				llcY = y;
+			else if(y > urcY)
+				urcY = y;
 		}
-		bRect->SetX0(llcX);
-		bRect->SetY0(llcY);
-		bRect->SetX1(urcX);
-		bRect->SetY1(llcY);
-		bRect->SetX2(urcX);
-		bRect->SetY2(urcY);
-		bRect->SetX3(llcX);
-		bRect->SetY3(urcY);
 	}
+	
+	bRect.SetX0(llcX);
+	bRect.SetY0(llcY);
+	bRect.SetX1(urcX);
+	bRect.SetY1(llcY);
+	bRect.SetX2(urcX);
+	bRect.SetY2(urcY);
+	bRect.SetX3(llcX);
+	bRect.SetY3(urcY);
 }
 
-void SetGrid(float minX, float maxX, float minY, float maxY, float dx, float dy)
+void SetGrid(float dx, float dy)
 {
+	//0.9*bRect.GetX0(), 1.1*bRect.GetX2(), 0.9*bRect.GetY0(), 1.1*bRect.GetY2(),50, 50
+	float w = bRect.GetX2() - bRect.GetX0();
+	float h = bRect.GetY2() - bRect.GetY0();
+	const float gridOverflow = 0.1f;
+	float minX = bRect.GetX0() - gridOverflow * w;
+	if(minX > 0) minX = 0;
+	float maxX = bRect.GetX2() + gridOverflow * w;
+	float minY = bRect.GetY0() - gridOverflow * h;
+	if(minY > 0) minY = 0;
+	float maxY = bRect.GetY2() + gridOverflow * h;
 	gridRect.SetMinMax(minX, minY, maxX, maxY);
 	gridSpacingX = dx;
 	gridSpacingY = dy;
@@ -137,10 +138,10 @@ void ScreenToWorld(int srcX, int srcY, float* worldX, float* worldY)
 
 void InitScales()
 {
-	float llcX = gridRect.GetX0();
-	float llcY = gridRect.GetY0();
-	float urcX = gridRect.GetX2();
-	float urcY = gridRect.GetY2();
+	float llcX = bRect.GetX0();
+	float llcY = bRect.GetY0();
+	float urcX = bRect.GetX2();
+	float urcY = bRect.GetY2();
 	float imageWidth = urcX - llcX;
 	float imageHeight = urcY - llcY;
 	float maxCoord = 0.8f * 2.0f;
@@ -290,9 +291,11 @@ void InitGL(int argc, char **argv)
 int main(int argc, char **argv)
 {
 	glyph = Test_API();
+	CalculateGlyphBoundary();
 	//Test_Print();
 	//printf("\n\n--------%d\n", glyph->size());
-	SetGrid(-100, 1500, -100, 1500,50, 50);
+	
+	SetGrid(50, 50);
 	
 	InitScales();
 	InitGL(argc, argv);
