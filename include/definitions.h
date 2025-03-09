@@ -19,6 +19,5 @@
 
 using namespace std;
 
-#include "rectangle.h"
 
 #endif

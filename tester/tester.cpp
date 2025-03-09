@@ -1,7 +1,4 @@
-#include "GL/freeglut.h"
-#include "GL/gl.h"
-#include "../include/definitions.h"
-#include "../include/type_interface.h"
+#include "tester.h"
 
 #define GLUT_MOUSE_WHEEL_UP 3
 #define GLUT_MOUSE_WHEEL_DOWN 4
