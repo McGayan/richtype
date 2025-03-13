@@ -1,6 +1,7 @@
 #ifndef PATH_H
 #define PATH_H
 
+#include "../include/definitions.h"
 #include "includes.h"
 
 void convertBezierToVertices(const FT_Vector& firstControlPoint, 
@@ -16,4 +17,6 @@ void convertBezierToVerticesAdaptive(const FT_Vector& firstControlPoint,
 								vector<double>* pointList);
 								
 void midPoint(FT_Vector& p1, FT_Vector& p2, FT_Vector& pMid);
+
+void scaleGlyph(GlyphOutline* glyph);
 #endif	//PATH_H

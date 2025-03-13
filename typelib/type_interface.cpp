@@ -21,13 +21,24 @@ vector<GlyphPoly*>* Test_API()
 		return NULL;
 	}
 
-	FT_Set_Pixel_Sizes(face, 0, 48); // Set height to 48 pixels
+	FT_Set_Pixel_Sizes(face, 0, PIXEL_SCALE); // Set height to 48 pixels
 
-	FT_UInt glyph_index = FT_Get_Char_Index(face, 'B'); // Get glyph index for 'A'
+	FT_UInt glyph_index = FT_Get_Char_Index(face, /*0xc2*/'O'); // Get glyph index for 'A'
 	if (FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT)) {
 		printf("Failed to load glyph\n");
 		return NULL;
 	}
+	
+	printf("x_scake: %ld\n", face->size->metrics.x_scale);
+	printf("Units per EM: %d\n", face->units_per_EM);
+
+
+
+double scale = (double)face->size->metrics.x_scale / (1 << 16);
+double x_pixel = 640 * scale / face->units_per_EM;
+printf("x_pixel: %f\n", x_pixel);
+
+
 
 	if (face->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
 		FT_Outline *outline = &face->glyph->outline;
@@ -42,7 +53,7 @@ vector<GlyphPoly*>* Test_API()
 			FT_Vector point, nextPoint, nextNextPoint;
 			char tag, nextTag, nextNextTag;
 			bool loopBack = outlineIter->getNextPoint(point, tag);
-			vector<double>* vertices = new vector<double>();
+			GlyphPoly* vertices = new GlyphPoly();
 			while(!loopBack)
 			{
 				//printf("%ld, %ld	tags->%X\n", point.x, point.y, (uint8_t)tag);
@@ -92,5 +103,6 @@ vector<GlyphPoly*>* Test_API()
 	
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
+	scaleGlyph(glyph);
 	return glyph;
 }

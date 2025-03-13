@@ -63,6 +63,8 @@ CRectangle gridRect;
 float gridSpacingX;
 float gridSpacingY;
 CRectangle bRect;
+int mousePointX = 0;
+int mousePointY = 0;
 
 void CalculateGlyphBoundary()
 {
@@ -164,13 +166,13 @@ void DrawGrid()
 	float maxY = (float)(gridRect.GetY2());
 	
 	glBegin(GL_LINES);
-	for (float y = minY; y<=maxY; y+=gridSpacingY)
+	for (float y = ((float)((int)(minY/gridSpacingY) - 1)) * gridSpacingY; y<=maxY; y+=gridSpacingY)
 	{
 		glVertex2f(minX, y);
 		glVertex2f(maxX, y);
 	}
 
-	for (float x = minX; x<=maxX; x+=gridSpacingX)
+	for (float x = ((float)((int)(minX/gridSpacingX) - 1)) * gridSpacingX; x<=maxX; x+=gridSpacingX)
 	{
 		glVertex2f(x, minY);
 		glVertex2f(x, maxY);
@@ -212,11 +214,35 @@ void Draw()
 	int width = glutGet(GLUT_WINDOW_WIDTH);
 	int height = glutGet(GLUT_WINDOW_HEIGHT);
 
+//glScalef(10, 10, 1);
+
+
+/*glBegin(GL_LINES);
+	glVertex2f(0, 0);
+	glVertex2f(0.5, 0.5);
+	glEnd();*/
+	
+/*	glRasterPos2f(-0.9f, -0.9f);
+glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
+
+unsigned char str[200];
+sprintf((char*)str, "%d, %d", mousePointX, mousePointY);
+glutBitmapString(GLUT_BITMAP_HELVETICA_18, str);*/
+
+//printf("here\n");
+
 	glScalef(scale, scale, 1);
 	glTranslatef(shiftX, shiftY, 0);
 	
+
+	/**/
+
 	DrawGrid();
 	DrawGlyph();
+	
+	
+
+    
 	glutSwapBuffers();
 }
 
@@ -230,7 +256,10 @@ void OnMouse(int button, int state, int x, int y)
 {
 	if(button==GLUT_LEFT_BUTTON && state==GLUT_DOWN)
 	{
-		;//printf("LEFT_DOWN: %d,%d\n", x, y);
+		float wx = 0;
+		float wy = 0;
+		ScreenToWorld(x, y, &wx, &wy);
+		printf("LEFT_DOWN SCR=> %d,%d\twld=> %f,%f\n", x, y, wx, wy);
 	}
 	else if(button==GLUT_LEFT_BUTTON && state==GLUT_UP)
 	{
@@ -266,6 +295,30 @@ void OnMouse(int button, int state, int x, int y)
 	}
 }
 
+void mouseMove(int x, int y)
+{
+	mousePointX = x;
+	mousePointY = y;
+	
+	glLoadIdentity();
+	glColor3f(0, 0, 0);
+	glBegin(GL_QUADS);
+        glVertex2f(-1.0f, -0.9f); // Bottom Left
+        glVertex2f(-1.0f, -1.0f);  // Bottom Right
+        glVertex2f(-0.5f, -1.0f);   // Top Right
+        glVertex2f(-0.5f, -0.9f);  // Top Left
+    glEnd();
+
+	glColor3f(0.7f, 0.54f, 0.0f);    
+	glRasterPos2f(-0.97f, -0.97f);
+
+	unsigned char str[200];
+	float wx, wy;
+	ScreenToWorld(x, y, &wx, &wy);
+	sprintf((char*)str, "%.3f, %.3f", wx, wy);
+	glutBitmapString(GLUT_BITMAP_8_BY_13, str);
+	glutSwapBuffers();
+}
 
 void InitGL(int argc, char **argv)
 {
@@ -282,6 +335,8 @@ void InitGL(int argc, char **argv)
 	glutDisplayFunc(Draw);
 	glutMouseFunc(OnMouse);
 	glutReshapeFunc(OnResize);
+	glutSetCursor(GLUT_CURSOR_CROSSHAIR);	//Hide the system pointer
+	glutPassiveMotionFunc(mouseMove);
 	glutMainLoop();
 }
 
@@ -292,7 +347,7 @@ int main(int argc, char **argv)
 	//Test_Print();
 	//printf("\n\n--------%d\n", glyph->size());
 	
-	SetGrid(50, 50);
+	SetGrid(.1f, .1f);
 	
 	InitScales();
 	InitGL(argc, argv);
