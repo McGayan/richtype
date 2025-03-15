@@ -4,7 +4,7 @@
 #define GLUT_MOUSE_WHEEL_DOWN 4
 #define WHEEL_ZOOM_DELTA 1.1f
 
-vector<GlyphPoly*>* glyph;
+vector<GlyphOutline*>* glyphCollection;
 
 using namespace std;
 
@@ -68,33 +68,54 @@ int mousePointY = 0;
 
 void CalculateGlyphBoundary()
 {
-	if((glyph == NULL) || (glyph->size() == 0))
+	float llcX = 0;
+	float llcY = 0;
+	float urcX = 0;
+	float urcY = 0;
+	if((glyphCollection == NULL) || (glyphCollection->size() == 0))
 		return;
-	auto *poly = glyph->at(0);
-	float x = poly->at(0);
-	float y = poly->at(1);
-	float llcX = x;
-	float llcY = y;
-	float urcX = x;
-	float urcY = y;
-	for(auto *poly : *glyph)
+	else
 	{
-		const int vertCount = (int)(poly->size() / 2);
-		for(int i=0; i<vertCount; i++)
+		bool breakLoop = false;
+		for(auto glyph : *glyphCollection)
 		{
-			x = poly->at(2*i);
-			y = poly->at(2*i + 1);
-			if(x < llcX)
-				llcX = x;
-			else if(x > urcX)
-				urcX = x;
-			if(y < llcY)
-				llcY = y;
-			else if(y > urcY)
-				urcY = y;
+			for(auto *poly : *glyph)
+			{
+				if(poly->size() > 1)
+				{
+					float x = poly->at(0);
+					float y = poly->at(1);
+					llcX = x;
+					llcY = y;
+					urcX = x;
+					urcY = y;
+					breakLoop = true;
+					break;
+				}
+			}
+			if(breakLoop)	break;
 		}
 	}
-	
+	for(auto glyph : *glyphCollection)
+	{
+		for(auto *poly : *glyph)
+		{
+			const int vertCount = (int)(poly->size() / 2);
+			for(int i=0; i<vertCount; i++)
+			{
+				float x = poly->at(2*i);
+				float y = poly->at(2*i + 1);
+				if(x < llcX)
+					llcX = x;
+				else if(x > urcX)
+					urcX = x;
+				if(y < llcY)
+					llcY = y;
+				else if(y > urcY)
+					urcY = y;
+			}
+		}
+	}
 	bRect.SetX0(llcX);
 	bRect.SetY0(llcY);
 	bRect.SetX1(urcX);
@@ -187,10 +208,10 @@ void DrawGrid()
 	glEnd();
 }
 
-void DrawGlyph()
+void DrawGlyph(vector<GlyphPoly*>* glyph)
 {
 	glColor3ub( 200, 200, 0 );
-	for(auto *poly : *glyph)
+	for(auto poly : *glyph)
 	{
 		const int vertCount = (int)(poly->size() / 2);
 		glBegin(GL_LINE_STRIP);
@@ -200,6 +221,14 @@ void DrawGlyph()
 		}
 		glVertex2f(poly->at(0), poly->at(1));	//closing segment
 		glEnd();
+	}
+}
+
+void DrawGlyphCollection()
+{
+	for(auto it : *glyphCollection)
+	{
+		DrawGlyph(it);
 	}
 }
 
@@ -214,35 +243,10 @@ void Draw()
 	int width = glutGet(GLUT_WINDOW_WIDTH);
 	int height = glutGet(GLUT_WINDOW_HEIGHT);
 
-//glScalef(10, 10, 1);
-
-
-/*glBegin(GL_LINES);
-	glVertex2f(0, 0);
-	glVertex2f(0.5, 0.5);
-	glEnd();*/
-	
-/*	glRasterPos2f(-0.9f, -0.9f);
-glColor4f(0.0f, 0.0f, 1.0f, 1.0f);
-
-unsigned char str[200];
-sprintf((char*)str, "%d, %d", mousePointX, mousePointY);
-glutBitmapString(GLUT_BITMAP_HELVETICA_18, str);*/
-
-//printf("here\n");
-
 	glScalef(scale, scale, 1);
 	glTranslatef(shiftX, shiftY, 0);
-	
-
-	/**/
-
 	DrawGrid();
-	DrawGlyph();
-	
-	
-
-    
+	DrawGlyphCollection();
 	glutSwapBuffers();
 }
 
@@ -303,10 +307,10 @@ void mouseMove(int x, int y)
 	glLoadIdentity();
 	glColor3f(0, 0, 0);
 	glBegin(GL_QUADS);
-        glVertex2f(-1.0f, -0.9f); // Bottom Left
-        glVertex2f(-1.0f, -1.0f);  // Bottom Right
-        glVertex2f(-0.5f, -1.0f);   // Top Right
-        glVertex2f(-0.5f, -0.9f);  // Top Left
+        glVertex2f(-1.0f, -0.9f);	// Bottom Left
+        glVertex2f(-1.0f, -1.0f);	// Bottom Right
+        glVertex2f(-0.5f, -1.0f);	// Top Right
+        glVertex2f(-0.5f, -0.9f);	// Top Left
     glEnd();
 
 	glColor3f(0.7f, 0.54f, 0.0f);    
@@ -342,7 +346,7 @@ void InitGL(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	glyph = Test_API();
+	glyphCollection = Test_API();
 	CalculateGlyphBoundary();
 	//Test_Print();
 	//printf("\n\n--------%d\n", glyph->size());

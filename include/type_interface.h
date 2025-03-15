@@ -3,7 +3,7 @@
 
 #include "definitions.h"
 
-vector<GlyphPoly*>* Test_API();
+vector<GlyphOutline*>* Test_API();
 
 
 #endif

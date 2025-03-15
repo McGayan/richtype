@@ -4,13 +4,14 @@
 #include "OutlineIterator.h"
 #include "path.h"
 
-vector<GlyphPoly*>* Test_API()
+vector<GlyphOutline*>* Test_API()
 {
 	const double dt = 0.1;
 	//printf("Hello World API");
 	FT_Library library;
 	FT_Face face;
 	vector<GlyphPoly*>* glyph;
+	vector<GlyphOutline*>* glyphCollection = new vector<GlyphOutline*> ();
 	if (FT_Init_FreeType(&library)) {
 		printf("ERROR: Could not initialize FreeType Library\n");
 		return NULL;
@@ -31,14 +32,6 @@ vector<GlyphPoly*>* Test_API()
 	
 	printf("x_scake: %ld\n", face->size->metrics.x_scale);
 	printf("Units per EM: %d\n", face->units_per_EM);
-
-
-
-double scale = (double)face->size->metrics.x_scale / (1 << 16);
-double x_pixel = 640 * scale / face->units_per_EM;
-printf("x_pixel: %f\n", x_pixel);
-
-
 
 	if (face->glyph->format == FT_GLYPH_FORMAT_OUTLINE) {
 		FT_Outline *outline = &face->glyph->outline;
@@ -88,13 +81,11 @@ printf("x_pixel: %f\n", x_pixel);
 							tag = 0x01;
 						}
 					}
-					
 				}
 				else
 				{
 					printf("\noff ???\n");
 				}
-
 			}
 			glyph->push_back(vertices);
 		}
@@ -104,5 +95,6 @@ printf("x_pixel: %f\n", x_pixel);
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
 	scaleGlyph(glyph);
-	return glyph;
+	glyphCollection->push_back(glyph);
+	return glyphCollection;
 }
