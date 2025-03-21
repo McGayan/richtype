@@ -3,7 +3,7 @@
 
 #include "definitions.h"
 
-vector<GlyphOutline*>* Test_API();
+vector<GlyphOutline*>* Test_API(wchar_t* utf32String);
 
 
 #endif

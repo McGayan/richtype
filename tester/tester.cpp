@@ -346,7 +346,12 @@ void InitGL(int argc, char **argv)
 
 int main(int argc, char **argv)
 {
-	glyphCollection = Test_API();
+	wchar_t str[20];
+	swprintf(str, sizeof(str), L"TA");
+	int len = wcslen(str);
+	printf("str: %ls\nlen: %d\n", str, len);
+	
+	glyphCollection = Test_API(str);
 	CalculateGlyphBoundary();
 	//Test_Print();
 	//printf("\n\n--------%d\n", glyph->size());

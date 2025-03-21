@@ -94,10 +94,13 @@ void midPoint(FT_Vector& p1, FT_Vector& p2, FT_Vector& pMid)
 	pMid.y = (int)((double)(p1.y + p2.y) / 2.0 + 0.5);
 }
 
-void scaleGlyph(GlyphOutline* glyph)
+void scaleGlyph(vector<GlyphOutline*>* glyphCollection)
 {
-	for(auto itPoly : *glyph)
+	for(auto itGlyph : *glyphCollection)
 	{
-		std::for_each(itPoly->begin(), itPoly->end(), [](double &n) { n /= PIXEL_SCALE * 64; });
+		for(auto itPoly : *itGlyph)
+		{
+			std::for_each(itPoly->begin(), itPoly->end(), [](double &n) { n /= PIXEL_SCALE * 64; });
+		}
 	}
 }

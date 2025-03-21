@@ -21,6 +21,6 @@ using namespace std;
 
 typedef vector<double> GlyphPoly;
 typedef vector<GlyphPoly*> GlyphOutline;
-#define PIXEL_SCALE 10
+#define PIXEL_SCALE 32
 
 #endif

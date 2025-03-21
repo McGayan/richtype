@@ -18,5 +18,5 @@ void convertBezierToVerticesAdaptive(const FT_Vector& firstControlPoint,
 								
 void midPoint(FT_Vector& p1, FT_Vector& p2, FT_Vector& pMid);
 
-void scaleGlyph(GlyphOutline* glyph);
+void scaleGlyph(vector<GlyphOutline*>* glyphCollection);
 #endif	//PATH_H
